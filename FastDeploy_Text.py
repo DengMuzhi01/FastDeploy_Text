@@ -6,6 +6,7 @@ import os
 import sys
 from urllib.parse import urlparse
 from pathlib import Path
+import platform
 
 class Print_Controler():
     def prt(self):
@@ -13,7 +14,7 @@ class Print_Controler():
         print("2.C++")
         print("3.VisualStudioCode")
         print("4..NET")
-        print("")
+        print("5.")
 
 class Python_Deploy():
     def _default_download_dir(self) -> Path:
@@ -58,10 +59,49 @@ class Python_Deploy():
         return name
 
     def Download_Installer(self):
-        url = input("请输入要下载的链接: ").strip()
-        if not url:
-            print("未输入链接，退出。")
-            return
+        def check_system_architecture():
+            architecture = platform.architecture()[0]
+            if "64" in architecture:
+                return 64
+            else:
+                return 32
+        
+
+        print("1. Python3.7")
+        print("2. Python3.8")
+        print("3. Python3.9")
+        print("4. Python3.11")
+        print("5. Python3.13")
+        VersionSelection = input("请选择要下载的版本:").strip()    
+        if VersionSelection == "1":
+            if check_system_architecture() == 32:
+                url = str("https://www.python.org/ftp/python/2.7.16/python-2.7.16.msi")
+            if check_system_architecture() == 64:
+                url = str("https://www.python.org/ftp/python/2.7.16/python-2.7.16.amd64.msi")
+        if VersionSelection == "2":
+            if check_system_architecture() == 32:
+                url = str("https://www.python.org/ftp/python/3.8.10/python-3.8.10.exe")
+            if check_system_architecture() == 64:
+                url = str("https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe")
+        if VersionSelection == "3":
+            if check_system_architecture() == 32:
+                url = str("https://www.python.org/ftp/python/3.9.7/python-3.9.7.exe")
+            if check_system_architecture() == 64:
+                url = str("https://www.python.org/ftp/python/3.9.7/python-3.9.7-amd64.exe")
+        if VersionSelection == "4":
+            if check_system_architecture() == 32:
+                url = str("https://www.python.org/ftp/python/3.11.4/python-3.11.4.exe")
+            if check_system_architecture() == 64:
+                url = str("https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe")
+        if VersionSelection == "5":
+            if check_system_architecture() == 32:
+                url = str("https://www.python.org/ftp/python/3.13.0/python-3.13.0.exe")
+            if check_system_architecture() == 64:
+                url = str("https://www.python.org/ftp/python/3.13.0/python-3.13.0-amd64.exe")
+        '''
+        else :
+            url = input("请输入要下载的链接: ").strip()
+'''
 
         filename = self._guess_filename(url)
         dest_dir = self._default_download_dir()
