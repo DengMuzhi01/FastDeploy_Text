@@ -7,7 +7,25 @@ import sys
 from urllib.parse import urlparse
 from pathlib import Path
 import platform
+import subprocess
 
+#以下是Python各版本安装包的地址
+PYTHON_V2716_32 = 'https://www.python.org/ftp/python/2.7.16/python-2.7.16.msi'
+PYTHON_V2716_64 = 'https://www.python.org/ftp/python/2.7.16/python-2.7.16.amd64.msi'
+PYTHON_V3810_32 = 'https://www.python.org/ftp/python/3.8.10/python-3.8.10.exe'
+PYTHON_V3810_64 = 'https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe'
+PYTHON_V3907_32 = 'https://www.python.org/ftp/python/3.9.7/python-3.9.7.exe'
+PYTHON_V3907_64 = 'https://www.python.org/ftp/python/3.9.7/python-3.9.7-amd64.exe'
+PYTHON_V3114_32 = 'https://www.python.org/ftp/python/3.11.4/python-3.11.4.exe'
+PYTHON_V3114_64 = 'https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe'
+PYTHON_V3130_32 = 'https://www.python.org/ftp/python/3.13.0/python-3.13.0.exe'
+PYTHON_V3130_64 = 'https://www.python.org/ftp/python/3.13.0/python-3.13.0-amd64.exe'
+
+#########################################################################################
+#
+#dengmuzhi09104@outlook.com 版权所有2
+#
+#########################################################################################
 class Print_Controler():
     def prt(self):
         print("1.python3")
@@ -28,6 +46,7 @@ class Python_Deploy():
         return dl
 
     async def _download_async(self, url: str, dest: Path):
+        await asyncio.sleep(0.1)
         timeout = aiohttp.ClientTimeout(total=None)  # 不设总超时
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get(url) as resp:
@@ -66,38 +85,42 @@ class Python_Deploy():
             else:
                 return 32
         
-
         print("1. Python3.7")
         print("2. Python3.8")
         print("3. Python3.9")
         print("4. Python3.11")
         print("5. Python3.13")
         VersionSelection = input("请选择要下载的版本:").strip()    
+
         if VersionSelection == "1":
             if check_system_architecture() == 32:
-                url = str("https://www.python.org/ftp/python/2.7.16/python-2.7.16.msi")
+                url = PYTHON_V2716_32
             if check_system_architecture() == 64:
-                url = str("https://www.python.org/ftp/python/2.7.16/python-2.7.16.amd64.msi")
+                url = PYTHON_V2716_64
+
         if VersionSelection == "2":
             if check_system_architecture() == 32:
-                url = str("https://www.python.org/ftp/python/3.8.10/python-3.8.10.exe")
+                url = PYTHON_V3810_32
             if check_system_architecture() == 64:
-                url = str("https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe")
+                url = PYTHON_V3810_64
+
         if VersionSelection == "3":
             if check_system_architecture() == 32:
-                url = str("https://www.python.org/ftp/python/3.9.7/python-3.9.7.exe")
+                url = PYTHON_V3907_32
             if check_system_architecture() == 64:
-                url = str("https://www.python.org/ftp/python/3.9.7/python-3.9.7-amd64.exe")
+                url = PYTHON_V3907_64
+
         if VersionSelection == "4":
             if check_system_architecture() == 32:
-                url = str("https://www.python.org/ftp/python/3.11.4/python-3.11.4.exe")
+                url = PYTHON_V3114_32
             if check_system_architecture() == 64:
-                url = str("https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe")
+                url = PYTHON_V3114_64
+        
         if VersionSelection == "5":
             if check_system_architecture() == 32:
-                url = str("https://www.python.org/ftp/python/3.13.0/python-3.13.0.exe")
+                url = PYTHON_V3130_32
             if check_system_architecture() == 64:
-                url = str("https://www.python.org/ftp/python/3.13.0/python-3.13.0-amd64.exe")
+                url = PYTHON_V3130_64
         if  VersionSelection not in ["1","2","3","4","5"]:
             print("无效的选择。请重新运行程序并选择有效的选项。")
         
@@ -120,6 +143,24 @@ class Python_Deploy():
             print(f"下载失败: {e}")
             input("按回车键退出...")
 
+
+
+class CPlus_Deploy():
+    def Get_System_Version(self):
+        if platform.system() == 'Windows':
+            Version = platform.version()
+
+        if '10' or '11' in Version:
+            Version = "NEW"
+
+        if not '10' or '11' in Version:
+            Version = "OLD"
+
+
+    def Download_Mingw_Installer(self, url: str, dest: Path|str):
+    
+        pass
+
 PRINT = Print_Controler()
 PRINT.prt()
 control01 = int(input("输入要选择部署的环境:"))
@@ -127,3 +168,6 @@ control01 = int(input("输入要选择部署的环境:"))
 if control01 == 1:
     deploy = Python_Deploy()
     deploy.Download_Installer()
+
+if control01 == 2:
+
