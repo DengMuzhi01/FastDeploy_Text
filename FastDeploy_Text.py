@@ -112,10 +112,13 @@ class Python_Deploy():
         try:
             asyncio.run(self._download_async(url, dest_path))
             print(f"下载完成: {dest_path}")
+            input("按回车键退出...")
         except aiohttp.ClientResponseError as e:
             print(f"HTTP 错误: {e.status} - {e.message if hasattr(e,'message') else str(e)}")
+            input("按回车键退出...")
         except Exception as e:
             print(f"下载失败: {e}")
+            input("按回车键退出...")
 
 PRINT = Print_Controler()
 PRINT.prt()
