@@ -98,11 +98,12 @@ class Python_Deploy():
                 url = str("https://www.python.org/ftp/python/3.13.0/python-3.13.0.exe")
             if check_system_architecture() == 64:
                 url = str("https://www.python.org/ftp/python/3.13.0/python-3.13.0-amd64.exe")
-        '''
-        else :
-            url = input("请输入要下载的链接: ").strip()
-'''
-
+        if  VersionSelection not in ["1","2","3","4","5"]:
+            print("无效的选择。请重新运行程序并选择有效的选项。")
+        
+            
+            
+            
         filename = self._guess_filename(url)
         dest_dir = self._default_download_dir()
         dest_path = dest_dir / filename
