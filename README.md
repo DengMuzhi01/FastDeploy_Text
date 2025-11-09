@@ -1,2 +1,17 @@
 # FastDeploy_Text
-##依赖库的安装
+## 依赖库的安装
+aiohappyeyeballs (2.6.1) 
+aiohttp (3.13.2) 
+aiosignal (1.4.0) 
+attrs (25.4.0) 
+certifi (2025.10.5) 
+charset-normalizer (3.4.4) 
+frozenlist (1.8.0) 
+multidict (6.7.0) 
+idna (3.11) 
+pip (25.3) 
+propcache (0.4.1) 
+requests (2.32.5) 
+urllib3 (2.5.0) 
+yarl (1.22.0)
+
