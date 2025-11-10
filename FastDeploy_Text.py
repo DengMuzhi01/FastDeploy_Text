@@ -1,4 +1,5 @@
 # coding = utf-8
+from webbrowser import get
 import requests
 import asyncio
 import aiohttp
@@ -8,6 +9,15 @@ from urllib.parse import urlparse
 from pathlib import Path
 import platform
 import subprocess
+import tarfile
+import zipfile
+from multiprocessing import Pool, cpu_count
+from tqdm import tqdm
+import winreg
+from pathlib import Path
+
+
+
 
 #以下是Python各版本安装包的地址
 PYTHON_V2716_32 = 'https://www.python.org/ftp/python/2.7.16/python-2.7.16.msi'
@@ -20,6 +30,10 @@ PYTHON_V3114_32 = 'https://www.python.org/ftp/python/3.11.4/python-3.11.4.exe'
 PYTHON_V3114_64 = 'https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe'
 PYTHON_V3130_32 = 'https://www.python.org/ftp/python/3.13.0/python-3.13.0.exe'
 PYTHON_V3130_64 = 'https://www.python.org/ftp/python/3.13.0/python-3.13.0-amd64.exe'
+
+#以下是MSYS2的压缩包下载地址
+BIN_COMPRESSED_FOR_MSYS2 = 'https://mirrors.tuna.tsinghua.edu.cn/msys2/distrib/x86_64/msys2-base-x86_64-20250830.tar.xz'
+
 
 #########################################################################################
 #
@@ -148,26 +162,188 @@ class Python_Deploy():
 class CPlus_Deploy():
     def Get_System_Version(self):
         if platform.system() == 'Windows':
-            Version = platform.version()
+            VersionForWindowsAge = platform.version()
 
-        if '10' or '11' in Version:
-            Version = "NEW"
+        if '10' or '11' in VersionForWindowsAge:
+            VersionForWindowsAge = "NEW"
 
-        if not '10' or '11' in Version:
-            Version = "OLD"
+        if not '10' or '11' in VersionForWindowsAge:
+            VersionForWindowsAge = "OLD"
 
 
-    def Download_Mingw_Installer(self, url: str, dest: Path|str):
+
+    def Download_MSYS2_Installer(self):
+         
+        MSYS2_Url = [BIN_COMPRESSED_FOR_MSYS2]
+        DOWNLOAD_DIR = get_windows_download_folder()
+        EXTRACT_DIR = "msys2_extract"
+        CHUNK_SIZE = 1024 * 1024  # 每次下载1MB块
+
+        
+
+        #通过注册表获取Windows下载目录
+        def get_windows_download_folder():
+            sub_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+                downloads, _ = winreg.QueryValueEx(key, '{374DE290-123F-4565-9164-39C4925E467B}')
+            return Path(downloads)
     
-        pass
+    
+        # 下载带进度条的文件
+        def download_with_progress(url, filepath):
+    
+            response = requests.get(url, stream=True)
+            if response.status_code != 200:
+                raise Exception(f"下载失败：{response.status_code} {url}")
 
+            total_size = int(response.headers.get("content-length", 0))
+            progress_bar = tqdm(
+                total=total_size,
+                unit="B",
+                unit_scale=True,
+                desc=os.path.basename(url),
+                ncols=80,
+                colour="cyan",
+            )
+
+            with open(filepath, "wb") as f:
+                for chunk in response.iter_content(CHUNK_SIZE):
+                    if chunk:
+                        f.write(chunk)
+                        progress_bar.update(len(chunk))
+
+            progress_bar.close()
+
+        # 自动解压支持的压缩格式
+        def extract_archive(filepath):
+            """自动解压支持的压缩格式"""
+            os.makedirs(EXTRACT_DIR, exist_ok=True)
+            filename = os.path.basename(filepath)
+
+            print(f"开始解压: {filename}")
+            try:
+                if filename.endswith(".zip"):
+                    with zipfile.ZipFile(filepath, "r") as zip_ref:
+                        zip_ref.extractall(EXTRACT_DIR)
+                elif filename.endswith((".tar.gz", ".tar.xz", ".tar")):
+                    with tarfile.open(filepath, "r:*") as tar_ref:
+                        tar_ref.extractall(EXTRACT_DIR)
+                else:
+                    print(f"不支持的文件格式: {filename}")
+                    return
+                print(f"解压完成: {filename}")
+            except Exception as e:
+                print(f"解压失败 {filename}: {e}")
+
+        # 下载并解压单个文件
+        def download_and_extract(url):
+            """下载并解压单个文件"""
+            os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+            filename = os.path.basename(url)
+            filepath = os.path.join(DOWNLOAD_DIR, filename)
+
+            print(f"开始下载: {url}")
+            try:
+                download_with_progress(url, filepath)
+                extract_archive(filepath)
+            except Exception as e:
+                print(f"任务失败 {url}: {e}")
+
+
+        def main():
+            print(f"启动多进程下载 ({cpu_count()} 核心)")
+            with Pool(processes=min(len(MSYS2_Url), cpu_count())) as pool:
+                pool.map(download_and_extract, MSYS2_Url)
+
+            print("\n全部任务完成 ")
+
+
+
+
+        return 0
+
+###
 PRINT = Print_Controler()
 PRINT.prt()
 control01 = int(input("输入要选择部署的环境:"))
+###
+
 
 if control01 == 1:
     deploy = Python_Deploy()
     deploy.Download_Installer()
 
 if control01 == 2:
+    '''
+    def get_windows_download_folder():
+        sub_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+            downloads, _ = winreg.QueryValueEx(key, '{374DE290-123F-4565-9164-39C4925E467B}')
+        return Path(downloads)
+    MSYS2_Url = [BIN_COMPRESSED_FOR_MSYS2]
+    DOWNLOAD_DIR = get_windows_download_folder()
+    EXTRACT_DIR = "msys2_extract"
+    CHUNK_SIZE = 1024 * 1024  # 每次下载1MB块
+    def download_with_progress(url, filepath):
+    
+        response = requests.get(url, stream=True)
+        if response.status_code != 200:
+            raise Exception(f"下载失败：{response.status_code} {url}")
 
+        total_size = int(response.headers.get("content-length", 0))
+        progress_bar = tqdm(
+            total=total_size,
+            unit="B",
+            unit_scale=True,
+            desc=os.path.basename(url),
+            ncols=80,
+            colour="cyan",
+        )
+
+        with open(filepath, "wb") as f:
+            for chunk in response.iter_content(CHUNK_SIZE):
+                if chunk:
+                    f.write(chunk)
+                    progress_bar.update(len(chunk))
+
+        progress_bar.close()
+    def extract_archive(filepath):
+        """自动解压支持的压缩格式"""
+        os.makedirs(EXTRACT_DIR, exist_ok=True)
+        filename = os.path.basename(filepath)
+
+        print(f"开始解压: {filename}")
+        try:
+            if filename.endswith(".zip"):
+                with zipfile.ZipFile(filepath, "r") as zip_ref:
+                    zip_ref.extractall(EXTRACT_DIR)
+            elif filename.endswith((".tar.gz", ".tar.xz", ".tar")):
+                with tarfile.open(filepath, "r:*") as tar_ref:
+                    tar_ref.extractall(EXTRACT_DIR)
+            else:
+                print(f"不支持的文件格式: {filename}")
+                return
+            print(f"解压完成: {filename}")
+        except Exception as e:
+            print(f"解压失败 {filename}: {e}")
+    def download_and_extract(url):
+        """下载并解压单个文件"""
+        os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+        filename = os.path.basename(url)
+        filepath = os.path.join(DOWNLOAD_DIR, filename)
+
+        print(f"开始下载: {url}")
+        try:
+            download_with_progress(url, filepath)
+            extract_archive(filepath)
+        except Exception as e:
+            print(f"任务失败 {url}: {e}")
+    def main():
+        print(f"启动多进程下载 ({cpu_count()} 核心)")
+        with Pool(processes=min(len(MSYS2_Url), cpu_count())) as pool:
+            pool.map(download_and_extract, MSYS2_Url)
+
+        print("\n全部任务完成 ")
+
+        '''
+    pass
