@@ -15,8 +15,7 @@ from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
 import winreg
 from pathlib import Path
-
-
+import class1
 
 
 #以下是Python各版本安装包的地址
@@ -160,22 +159,11 @@ class Python_Deploy():
 
 
 class CPlus_Deploy():
-    def Get_System_Version(self):
-        if platform.system() == 'Windows':
-            VersionForWindowsAge = platform.version()
 
-        if '10' or '11' in VersionForWindowsAge:
-            VersionForWindowsAge = "NEW"
-
-        if not '10' or '11' in VersionForWindowsAge:
-            VersionForWindowsAge = "OLD"
-
-
-
+    
     def Download_MSYS2_Installer(self):
-         
         MSYS2_Url = [BIN_COMPRESSED_FOR_MSYS2]
-        DOWNLOAD_DIR = get_windows_download_folder()
+        DOWNLOAD_DIR = self._get_windows_download_folder()  # 现在安全调用
         EXTRACT_DIR = "msys2_extract"
         CHUNK_SIZE = 1024 * 1024  # 每次下载1MB块
 
@@ -187,7 +175,7 @@ class CPlus_Deploy():
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
                 downloads, _ = winreg.QueryValueEx(key, '{374DE290-123F-4565-9164-39C4925E467B}')
             return Path(downloads)
-    
+
     
         # 下载带进度条的文件
         def download_with_progress(url, filepath):
@@ -259,91 +247,25 @@ class CPlus_Deploy():
 
 
 
-
-        return 0
+if __name__ == "__main__":
 
 ###
-PRINT = Print_Controler()
-PRINT.prt()
-control01 = int(input("输入要选择部署的环境:"))
-###
+    PRINT = Print_Controler()
+    PRINT.prt()
+    control01 = int(input("输入要选择部署的环境:"))
+    prt01 = class1.my_class()
+    prt01.prt()
+    ###
 
 
-if control01 == 1:
-    deploy = Python_Deploy()
-    deploy.Download_Installer()
+    if control01 == 1:
+        deploy = Python_Deploy()
+        deploy.Download_Installer()
 
-if control01 == 2:
-    '''
-    def get_windows_download_folder():
-        sub_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
-            downloads, _ = winreg.QueryValueEx(key, '{374DE290-123F-4565-9164-39C4925E467B}')
-        return Path(downloads)
-    MSYS2_Url = [BIN_COMPRESSED_FOR_MSYS2]
-    DOWNLOAD_DIR = get_windows_download_folder()
-    EXTRACT_DIR = "msys2_extract"
-    CHUNK_SIZE = 1024 * 1024  # 每次下载1MB块
-    def download_with_progress(url, filepath):
-    
-        response = requests.get(url, stream=True)
-        if response.status_code != 200:
-            raise Exception(f"下载失败：{response.status_code} {url}")
+    if control01 == 2:
 
-        total_size = int(response.headers.get("content-length", 0))
-        progress_bar = tqdm(
-            total=total_size,
-            unit="B",
-            unit_scale=True,
-            desc=os.path.basename(url),
-            ncols=80,
-            colour="cyan",
-        )
+        #deploy = CPlus_Deploy.Download_MSYS2_Installer.()
+        deploy.Download_MSYS2_Installer()
+        pass
 
-        with open(filepath, "wb") as f:
-            for chunk in response.iter_content(CHUNK_SIZE):
-                if chunk:
-                    f.write(chunk)
-                    progress_bar.update(len(chunk))
 
-        progress_bar.close()
-    def extract_archive(filepath):
-        """自动解压支持的压缩格式"""
-        os.makedirs(EXTRACT_DIR, exist_ok=True)
-        filename = os.path.basename(filepath)
-
-        print(f"开始解压: {filename}")
-        try:
-            if filename.endswith(".zip"):
-                with zipfile.ZipFile(filepath, "r") as zip_ref:
-                    zip_ref.extractall(EXTRACT_DIR)
-            elif filename.endswith((".tar.gz", ".tar.xz", ".tar")):
-                with tarfile.open(filepath, "r:*") as tar_ref:
-                    tar_ref.extractall(EXTRACT_DIR)
-            else:
-                print(f"不支持的文件格式: {filename}")
-                return
-            print(f"解压完成: {filename}")
-        except Exception as e:
-            print(f"解压失败 {filename}: {e}")
-    def download_and_extract(url):
-        """下载并解压单个文件"""
-        os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-        filename = os.path.basename(url)
-        filepath = os.path.join(DOWNLOAD_DIR, filename)
-
-        print(f"开始下载: {url}")
-        try:
-            download_with_progress(url, filepath)
-            extract_archive(filepath)
-        except Exception as e:
-            print(f"任务失败 {url}: {e}")
-    def main():
-        print(f"启动多进程下载 ({cpu_count()} 核心)")
-        with Pool(processes=min(len(MSYS2_Url), cpu_count())) as pool:
-            pool.map(download_and_extract, MSYS2_Url)
-
-        print("\n全部任务完成 ")
-
-        '''
-    pass
